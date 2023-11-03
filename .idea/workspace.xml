@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="9171cef5-dd5f-4b07-8cde-140ae2be71c0" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/Mala_Direta_Eduardo.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Mala_Direta_Eduardo.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Eleitores.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Interface_grafica.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/interface_grafica/Analysis-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/interface_grafica/Analysis-00.toc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/interface_grafica/EXE-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/interface_grafica/EXE-00.toc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/interface_grafica/PKG-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/interface_grafica/PKG-00.toc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/interface_grafica/PYZ-00.pyz" beforeDir="false" afterPath="$PROJECT_DIR$/build/interface_grafica/PYZ-00.pyz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/interface_grafica/PYZ-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/interface_grafica/PYZ-00.toc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/interface_grafica/Tree-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/interface_grafica/Tree-00.toc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/interface_grafica/Tree-01.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/interface_grafica/Tree-01.toc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/interface_grafica/Tree-02.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/interface_grafica/Tree-02.toc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/interface_grafica/interface_grafica.exe.manifest" beforeDir="false" afterPath="$PROJECT_DIR$/build/interface_grafica/interface_grafica.exe.manifest" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/interface_grafica/interface_grafica.pkg" beforeDir="false" afterPath="$PROJECT_DIR$/build/interface_grafica/interface_grafica.pkg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/interface_grafica/warn-interface_grafica.txt" beforeDir="false" afterPath="$PROJECT_DIR$/build/interface_grafica/warn-interface_grafica.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/interface_grafica/xref-interface_grafica.html" beforeDir="false" afterPath="$PROJECT_DIR$/build/interface_grafica/xref-interface_grafica.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cep_util.py" beforeDir="false" afterPath="$PROJECT_DIR$/cep_util.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/funcoes_compartilhadas.py" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="2VV3FU2PLVgAWzlIWKr8ItDIkYs" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;G:/Mala_Direta_Eduardo&quot;
+  }
+}</component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9171cef5-dd5f-4b07-8cde-140ae2be71c0" name="Changes" comment="" />
+      <created>1694907316830</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1694907316830</updated>
+    </task>
+    <servers />
+  </component>
+</project>
