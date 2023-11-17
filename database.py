@@ -2,11 +2,11 @@ import psycopg2
 
 def conectar_banco_dados():
     conexao = psycopg2.connect(
-        host='monorail.proxy.rlwy.net', 
+        host='roundhouse.proxy.rlwy.net', 
         user='postgres',
-        password='dfa5Bf1GDEEaeEGf6CFcga23EfF1G34E',
+        password='FbBC5BdfeCaDdEF2aAcb6G2CdeFd366f',
         database='railway',
-        port='53590'
+        port='32589'
     )
     return conexao
 
