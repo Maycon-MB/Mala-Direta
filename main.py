@@ -957,7 +957,7 @@ input_elements = [janela[key] for key in janela.AllKeysDict if isinstance(janela
 eleitores_registrados = {}
 
 # Senha de acesso
-senha_correta = "dudu1717"
+senha_correta = "123"
 
 # Função para verificar a senha
 def verificar_senha(senha_informada):
