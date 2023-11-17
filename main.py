@@ -1,7 +1,7 @@
 import PySimpleGUI as sg
 from PySimpleGUI import (Button, Text, Column, VSeparator, Push)
 from cep_util import consultar_cep
-from database import exibir_eleitores, registrar_eleitor, atualizar_registro
+from database import exibir_eleitores,verificar_duplicata, registrar_eleitor, atualizar_registro, executar_query
 from database import deletar_porID, filtrar_por_obs, filtrar_por_bairro, filtrar_por_cep, filtrar_por_cidade, filtrar_por_complemento, filtrar_por_email, filtrar_por_instagram, filtrar_por_logradouro, filtrar_por_nascimento, filtrar_por_nome, filtrar_por_numero, filtrar_por_telefone, filtrar_por_uf, filtrar_por_local, filtrar_por_secao, filtrar_por_zona
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
@@ -103,6 +103,34 @@ def etiqueta_Nascimento():
 
     sg.popup(f"Etiqueta com nascimento criada com sucesso: {pdf_filename}")
 
+def etiqueta_Cidade():
+    global eleitores_filtrados
+
+ # Ordene os eleitores pelo nome (índice 1)
+    eleitores_filtrados.sort(key=lambda eleitor: (eleitor[1].lower()))
+
+    pdf_filename = "etiqueta-cidade.pdf"
+
+    # Criação do texto da etiqueta por cidade
+    etiqueta_data = []
+    for eleitor in eleitores_filtrados:
+        cep_formatado = formatar_cep(eleitor[3])
+
+        etiqueta_text = (
+            f"{eleitor[1].upper()}\n\n{eleitor[4]}, {eleitor[5]}, {eleitor[6]}\n{eleitor[7]}, {eleitor[8]} - {eleitor[9]}\n\n{cep_formatado}"
+        )
+
+        etiqueta_data.append(etiqueta_text)
+
+    generate_pdf(pdf_filename, etiqueta_data)
+
+    try:
+        subprocess.Popen([pdf_filename], shell=True)
+    except Exception as e:
+        print(f"Erro ao abrir o PDF: {e}")
+
+    sg.popup(f"Etiqueta por Cidade criada com sucesso: {pdf_filename}")
+
 def etiqueta_Geral():
     # Use a lista de eleitores completa, sem filtrar
     eleitores_completos = exibir_eleitores()
@@ -133,7 +161,7 @@ def etiqueta_Geral():
 
 pessoas_registradas = exibir_eleitores() #inicialize a lista global
 eleitores_exibidos = []
-dados_formatados = exibir_eleitores()
+eleitores_filtrados = exibir_eleitores()
 
 
 # Função para gerar PDF com nome + email
@@ -635,9 +663,13 @@ def formatar_telefone(valor_atual):
     # Remove todos os caracteres não numéricos
     valor_formatado = ''.join(filter(str.isdigit, valor_atual))
 
+    # Se o número de telefone tiver exatamente 9 dígitos, adicione o formato 0 0000-0000
     if len(valor_formatado) == 9:
         valor_formatado = f'{valor_formatado[0]} {valor_formatado[1:5]}-{valor_formatado[5:]}'
-    # Se o número de telefone tiver exatamente 8 dígitos, adicione o formato XXXX-XXXX
+    # Se o número de telefone tiver exatamente 11 dígitos, adicione o formato (00) 0 0000-0000        
+    elif len(valor_formatado) == 11:
+        valor_formatado = f'({valor_formatado[:2]}) {valor_formatado[2]} {valor_formatado[3:7]}-{valor_formatado[7:]}'
+    # Se o número de telefone tiver exatamente 8 dígitos, adicione o formato 0000-0000
     elif len(valor_formatado) == 8:
         valor_formatado = f'{valor_formatado[:4]}-{valor_formatado[4:]}'
 
@@ -703,7 +735,7 @@ def exibir_menu_opcoes():
 # Função para limpar os filtros e restaurar a lista original de eleitores
 def limpar_filtros():
     global eleitores_filtrados
-    eleitores_filtrados = dados_formatados.copy()  # Restaura a lista original de eleitores
+    eleitores_filtrados = eleitores_filtrados.copy()  # Restaura a lista original de eleitores
     janela_eleitores['-OUTPUT-'].update(values=eleitores_filtrados)
  
 
@@ -809,17 +841,17 @@ def criar_janela_exibir_eleitores(total_eleitores):
     
     
     layout_total_eleitores = [
-    [sg.Text(f'Total de Eleitores: {len(dados_formatados)}', key='-TOTAL-ELEITORES-')]
+    [sg.Text(f'Total de Eleitores: {len(eleitores_filtrados)}', key='-TOTAL-ELEITORES-')]
     ]
 
     layout_botoesSegundaTela = [
-        [sg.Combo(['Etiqueta Geral','Etiqueta com Nascimento', 'Relatório por Instagram', 'Relatório por E-mail', 'Relatório por Telefone', 'Relatório por OBS', 'Relatório por Bairro', 'Relatório por Cidade', 'Relatório por Zona', 'Relatório por Seção', 'Relatório por Local'], key='-COMBO-'),
+        [sg.Combo(['Etiqueta Geral','Etiqueta com Nascimento', 'Etiqueta por Cidade', 'Relatório por Instagram', 'Relatório por E-mail', 'Relatório por Telefone', 'Relatório por OBS', 'Relatório por Bairro', 'Relatório por Cidade', 'Relatório por Zona', 'Relatório por Seção', 'Relatório por Local'], key='-COMBO-'),
         sg.Button('Imprimir', expand_x=True, expand_y=True, key='-IMPRIMIR-', size=(10, 1)), sg.Button('Limpar Filtros', expand_x=True, expand_y=True, key='-LIMPAR-FILTROS-', size=(10, 1)), sg.Button('Deletar Eleitor', expand_x=True, expand_y=True, size=(10, 1)), sg.Button('Fechar', expand_x=True, expand_y=True, size=(10, 1)), ],
     ]
 
     layout_fecharExibicao = [
-        [sg.Table(values=(dados_formatados), headings=['Matrícula', 'Nome', 'Nascimento', 'CEP','Logradouro', 'Número', 'Complemento', 'Bairro', 'Cidade', 'UF', 'E-mail', 'Telefone', 'Instagram', 'OBS', 'Zona', 'Seção', 'Local'], auto_size_columns=True,
-            justification='center', key='-OUTPUT-',text_color='black', background_color='#C7CEC9', alternating_row_color='#3DA5FF', num_rows=min(25, len(dados_formatados)), expand_x=True, expand_y=True, size=(550, 400), select_mode='browse'), 
+        [sg.Table(values=eleitores_filtrados, headings=['Matrícula', 'Nome', 'Nascimento', 'CEP','Logradouro', 'Número', 'Complemento', 'Bairro', 'Cidade', 'UF', 'E-mail', 'Telefone', 'Instagram', 'OBS', 'Zona', 'Seção', 'Local'], auto_size_columns=True,
+            justification='center', vertical_scroll_only = False, key='-OUTPUT-',text_color='black', background_color='#C7CEC9', alternating_row_color='#3DA5FF', num_rows=min(25, len(eleitores_filtrados)), expand_x=True, expand_y=True, size=(550, 400), select_mode='browse', col_widths=25), 
         ],
         [sg.Button('Editar Tabela')],
         [sg.Column(layout_botoesSegundaTela, justification='center')]
@@ -1023,22 +1055,16 @@ while True:
         break
     
     if eventos == 'Registrar eleitor':
-        nome = valores['nome'].upper()
-        # Verifique se o nome já está registrado
-        if nome in eleitores_registrados:
-            sg.popup_error(f"O eleitor com o nome '{nome}' já está cadastrado.")
-        elif not nome:  # Verifique se o campo "nome" está vazio
-            sg.popup_error('Preencha o campo obrigatório (Nome).')
+        nome = valores['nome']
+        if not verificar_duplicata(nome):
+                registrar_eleitor(valores)
         else:
-            # Se não estiver registrado e o campo "nome" não estiver vazio, adicione-o ao dicionário
-            eleitores_registrados[nome] = valores
-            sg.popup('Eleitor registrado(a) com sucesso!')
-            registrar_eleitor(valores)
+            sg.popup_error("O eleitor com o nome informado já está cadastrado.")
             limpar_campos_janela(janela)
                  # Após registrar um novo eleitor, atualize a segunda janela com os dados atualizados
                # Definir o foco no primeiro campo após limpar
             janela["nome"].set_focus()
-            dados_formatados = exibir_eleitores()
+            eleitores_filtrados = exibir_eleitores()
           
     if eventos == '\r':
         # Quando Enter é pressionado, mova o foco para o próximo elemento
@@ -1093,7 +1119,7 @@ while True:
                 formatted_data += f"{eleitor[16]}\n"
     
         janela_eleitores = criar_janela_exibir_eleitores(formatted_data)
-        pessoas_registradas.append(dados_formatados)
+        pessoas_registradas.append(eleitores_filtrados)
         janela.Hide()
         
         # Após exibir os eleitores em janela_eleitores
@@ -1124,14 +1150,16 @@ while True:
                 if last_highlighted_row is not None:
                     janela_eleitores['-OUTPUT-'].update(select_rows=[last_highlighted_row], background_color='white')
                 last_highlighted_row = None
+                edit_window = None  # Inicialize a variável edit_window antes do bloco onde você está tentando acessá-la
 
-            if eventos_eleitores == 'Editar Tabela':
-                selected_index = valores_eleitores['-OUTPUT-'][0] if valores_eleitores['-OUTPUT-'] else None
-                if selected_index is not None:
-                    selected_index = int(selected_index)  # Converta para inteiro
-                    selected_id = dados_formatados[selected_index][0]  # Obtenha o ID do registro selecionado
-                    edit_window = criar_janela_edicao(dados_formatados[selected_index], selected_id)
-                
+                if eventos_eleitores == 'Editar Tabela':
+                    selected_index = valores_eleitores['-OUTPUT-'][0] if valores_eleitores['-OUTPUT-'] else None
+                    if selected_index is not None:
+                        selected_index = int(selected_index)  # Converta para inteiro
+                        selected_id = eleitores_filtrados[selected_index][0]  # Obtenha o ID do registro selecionado
+                        edit_window = criar_janela_edicao(eleitores_filtrados[selected_index], selected_id)
+
+                                    
                     while True:
                         edit_event, edit_values = edit_window.read()
                         
@@ -1161,42 +1189,41 @@ while True:
                                 local_input = edit_values['local']
 
                                 if nome_input is not None:
-                                    dados_formatados[selected_index][1] = nome_input
-
+                                    eleitores_filtrados[selected_index][1] = nome_input
                                 if nascimento_input is not None:
-                                    dados_formatados[selected_index][2] = nascimento_input
+                                    eleitores_filtrados[selected_index][2] = nascimento_input
                                 if cep_input is not None:
-                                    dados_formatados[selected_index][3] = cep_input
+                                    eleitores_filtrados[selected_index][3] = cep_input
                                 if logradouro_input is not None:
-                                    dados_formatados[selected_index][4] = logradouro_input   
+                                    eleitores_filtrados[selected_index][4] = logradouro_input   
                                 if numero_input is not None:
-                                    dados_formatados[selected_index][5] = numero_input
+                                    eleitores_filtrados[selected_index][5] = numero_input
                                 if complemento_input is not None:
-                                    dados_formatados[selected_index][6] = complemento_input
+                                    eleitores_filtrados[selected_index][6] = complemento_input
                                 if bairro_input is not None:
-                                    dados_formatados[selected_index][7] = bairro_input
+                                    eleitores_filtrados[selected_index][7] = bairro_input
                                 if cidade_input is not None:
-                                    dados_formatados[selected_index][8] = cidade_input
+                                    eleitores_filtrados[selected_index][8] = cidade_input
                                 if uf_input is not None:
-                                    dados_formatados[selected_index][9] = uf_input
+                                    eleitores_filtrados[selected_index][9] = uf_input
                                 if email_input is not None:
-                                    dados_formatados[selected_index][10] = email_input
+                                    eleitores_filtrados[selected_index][10] = email_input
                                 if telefone_input is not None:
-                                    dados_formatados[selected_index][11] = telefone_input
+                                    eleitores_filtrados[selected_index][11] = telefone_input
                                 if instagram_input is not None:
-                                    dados_formatados[selected_index][12] = instagram_input
+                                    eleitores_filtrados[selected_index][12] = instagram_input
                                 if obs_input is not None:
-                                    dados_formatados[selected_index][13] = obs_input
+                                    eleitores_filtrados[selected_index][13] = obs_input
                                 if zona_input is not None:
-                                    dados_formatados[selected_index][14] = zona_input
+                                    eleitores_filtrados[selected_index][14] = zona_input
                                 if secao_input is not None:
-                                    dados_formatados[selected_index][15] = secao_input
+                                    eleitores_filtrados[selected_index][15] = secao_input
                                 if local_input is not None:
-                                    dados_formatados[selected_index][16] = local_input
+                                    eleitores_filtrados[selected_index][16] = local_input
                                 # Chame a função para atualizar o registro no banco de dados
                                 atualizar_registro(selected_id, nome_input, nascimento_input, cep_input, logradouro_input, numero_input, complemento_input, bairro_input, cidade_input, uf_input, email_input, telefone_input, instagram_input, obs_input, zona_input, secao_input, local_input)
        
-                                atualizar_tabela(janela_eleitores, dados_formatados)
+                                atualizar_tabela(janela_eleitores, eleitores_filtrados)
                             break
 
                     edit_window.close()
@@ -1207,7 +1234,12 @@ while True:
                     eleitores_filtrados.sort(key=lambda eleitor: eleitor[1])
                     # Generate the PDF for "Etiqueta com Nascimento"
                     etiqueta_Nascimento()
-                    pessoas_registradas.append(eleitor) 
+                    pessoas_registradas.append(eleitor)
+                elif selected_option == 'Etiqueta por Cidade':
+                    eleitores_filtrados.sort(key=lambda eleitor: eleitor[1])
+                    # Generate the PDF for "Etiqueta por Cidade"
+                    etiqueta_Cidade()
+                    pessoas_registradas.append(eleitor)                 
                 elif selected_option == 'Etiqueta Geral':
                     # Generate the PDF for "Etiqueta Geral"
                     etiqueta_Geral()
@@ -1264,9 +1296,12 @@ while True:
                 nome_filtro = sg.popup_get_text("Digite o nome para filtrar:")
                 if nome_filtro:
                     eleitores_filtrados = filtrar_por_nome(nome_filtro)
+                    # Ordenar a lista em ordem alfabética com base no nome
+                    eleitores_filtrados = sorted(eleitores_filtrados, key=lambda x: x[1])
                     # Atualize a tabela com os resultados filtrados
                     janela_eleitores['-OUTPUT-'].update(values=eleitores_filtrados)
                     atualizar_contagem_eleitores()  # Atualizar a contagem de eleitores
+                    selected_index = None  # Reinicie o índice selecionado
             
 
             if eventos_eleitores == 'Filtrar por Nascimento':
@@ -1280,9 +1315,12 @@ while True:
                         nascimento_filtro = f"{nascimento_filtro[:2]}/{nascimento_filtro[2:]}"
                     
                     eleitores_filtrados = filtrar_por_nascimento(nascimento_filtro)
+                    # Ordenar a lista em ordem alfabética com base no nome
+                    eleitores_filtrados = sorted(eleitores_filtrados, key=lambda x: x[1])
                     # Atualize a tabela com os resultados filtrados
                     janela_eleitores['-OUTPUT-'].update(values=eleitores_filtrados)
                     atualizar_contagem_eleitores()  # Atualizar a contagem de eleitores
+                    selected_index = None  # Reinicie o índice selecionado
 
 
            
@@ -1290,71 +1328,101 @@ while True:
                 logradouro_filtro = sg.popup_get_text("Digite o logradouro para filtrar:")
                 if logradouro_filtro:
                     eleitores_filtrados = filtrar_por_logradouro(logradouro_filtro)
+                    # Ordenar a lista em ordem alfabética com base no nome
+                    eleitores_filtrados = sorted(eleitores_filtrados, key=lambda x: x[1])
                     # Atualize a tabela com os resultados filtrados
                     janela_eleitores['-OUTPUT-'].update(values=eleitores_filtrados)
                     atualizar_contagem_eleitores()  # Atualizar a contagem de eleitores
+                    selected_index = None  # Reinicie o índice selecionado
             
             if eventos_eleitores == 'Filtrar por Bairro':
                 bairro_filtro = sg.popup_get_text("Digite o Bairro para filtrar:")
                 if bairro_filtro:
                     eleitores_filtrados = filtrar_por_bairro(bairro_filtro)
+                    # Ordenar a lista em ordem alfabética com base no nome
+                    eleitores_filtrados = sorted(eleitores_filtrados, key=lambda x: x[1])
                     # Atualize a tabela com os resultados filtrados
                     janela_eleitores['-OUTPUT-'].update(values=eleitores_filtrados)
                     atualizar_contagem_eleitores()  # Atualizar a contagem de eleitores
+                    selected_index = None  # Reinicie o índice selecionado
 
             
             if eventos_eleitores == 'Filtrar por Cidade':
                 cidade_filtro = sg.popup_get_text("Digite a Cidade para filtrar:")
                 if cidade_filtro:
                     eleitores_filtrados = filtrar_por_cidade(cidade_filtro)
+                    # Ordenar a lista em ordem alfabética com base no nome
+                    eleitores_filtrados = sorted(eleitores_filtrados, key=lambda x: x[1])
                     # Atualize a tabela com os resultados filtrados
                     janela_eleitores['-OUTPUT-'].update(values=eleitores_filtrados)
                     atualizar_contagem_eleitores()  # Atualizar a contagem de eleitores
+                    selected_index = None  # Reinicie o índice selecionado
 
 
             if eventos_eleitores == 'Filtrar por E-mail':
                 eleitores_filtrados = filtrar_por_email("")
+                # Ordenar a lista em ordem alfabética com base no nome
+                eleitores_filtrados = sorted(eleitores_filtrados, key=lambda x: x[1])
                 janela_eleitores['-OUTPUT-'].update(values=eleitores_filtrados)
                 atualizar_contagem_eleitores()  # Atualizar a contagem de eleitores
+                selected_index = None  # Reinicie o índice selecionado
 
             if eventos_eleitores == 'Filtrar por Telefone':
                 eleitores_filtrados = filtrar_por_telefone("")
+                # Ordenar a lista em ordem alfabética com base no nome
+                eleitores_filtrados = sorted(eleitores_filtrados, key=lambda x: x[1])
                 janela_eleitores['-OUTPUT-'].update(values=eleitores_filtrados)
                 atualizar_contagem_eleitores()  # Atualizar a contagem de eleitores
+                selected_index = None  # Reinicie o índice selecionado
 
             if eventos_eleitores == 'Filtrar por Instagram':
                 eleitores_filtrados = filtrar_por_instagram("")
+                # Ordenar a lista em ordem alfabética com base no nome
+                eleitores_filtrados = sorted(eleitores_filtrados, key=lambda x: x[1])
                 janela_eleitores['-OUTPUT-'].update(values=eleitores_filtrados)
                 atualizar_contagem_eleitores()  # Atualizar a contagem de eleitores
+                selected_index = None  # Reinicie o índice selecionado
 
             if eventos_eleitores == 'Filtrar por OBS':
                 eleitores_filtrados = filtrar_por_obs("")
+                # Ordenar a lista em ordem alfabética com base no nome
+                eleitores_filtrados = sorted(eleitores_filtrados, key=lambda x: x[1])
                 janela_eleitores['-OUTPUT-'].update(values=eleitores_filtrados)
                 atualizar_contagem_eleitores()  # Atualizar a contagem de eleitores
+                selected_index = None  # Reinicie o índice selecionado
 
             if eventos_eleitores == 'Filtrar por Zona':
                 zona_filtro = sg.popup_get_text("Digite a Zona para filtrar:")
                 if zona_filtro:
                     eleitores_filtrados = filtrar_por_zona(zona_filtro)
+                    # Ordenar a lista em ordem alfabética com base no nome
+                    eleitores_filtrados = sorted(eleitores_filtrados, key=lambda x: x[1])
                     # Atualize a tabela com os resultados filtrados
                     janela_eleitores['-OUTPUT-'].update(values=eleitores_filtrados)
                     atualizar_contagem_eleitores()  # Atualizar a contagem de eleitores
+                    selected_index = None  # Reinicie o índice selecionado
 
             if eventos_eleitores == 'Filtrar por Seção':
                 secao_filtro = sg.popup_get_text("Digite a Seção para filtrar:")
                 if secao_filtro:
                     eleitores_filtrados = filtrar_por_secao(secao_filtro)
+                    # Ordenar a lista em ordem alfabética com base no nome
+                    eleitores_filtrados = sorted(eleitores_filtrados, key=lambda x: x[1])
                     # Atualize a tabela com os resultados filtrados
                     janela_eleitores['-OUTPUT-'].update(values=eleitores_filtrados)
                     atualizar_contagem_eleitores()  # Atualizar a contagem de eleitores
+                    selected_index = None  # Reinicie o índice selecionado
 
             if eventos_eleitores == 'Filtrar por Local':
                 local_filtro = sg.popup_get_text("Digite a Cidade para filtrar:")
                 if local_filtro:
                     eleitores_filtrados = filtrar_por_local(local_filtro)
+                    # Ordenar a lista em ordem alfabética com base no nome
+                    eleitores_filtrados = sorted(eleitores_filtrados, key=lambda x: x[1])
                     # Atualize a tabela com os resultados filtrados
                     janela_eleitores['-OUTPUT-'].update(values=eleitores_filtrados)
                     atualizar_contagem_eleitores()  # Atualizar a contagem de eleitores
+                    selected_index = None  # Reinicie o índice selecionado
                     
             def formatar_eleitor(eleitor):
                 if len(eleitor) >= 16:
